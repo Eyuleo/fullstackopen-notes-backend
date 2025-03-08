@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors"
 
 const app = express()
 
@@ -20,8 +21,11 @@ const requestLogger = (request, response, next) => {
 	next()
 }
 
+app.use(express.static('dist'))
+
 app.use(express.json())
 app.use(requestLogger)
+app.use(cors())
 
 const unknownEndpoint = (request, response) => {
 	response.status(404).send({ error: "unknown endpoint" })
@@ -71,7 +75,7 @@ app.delete("/api/notes/:id", (req, res) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 8080
+const PORT = process.env.PORT || 8080
 
 app.listen(PORT, () => {
 	console.log(`server running on port ${PORT}`)
