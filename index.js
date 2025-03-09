@@ -6,16 +6,6 @@ import Note from "./models/note.js"
 
 const app = express()
 
-let notes = [
-	{ id: "1", content: "HTML is easy", important: true },
-	{ id: "2", content: "Browser can execute only JavaScript", important: false },
-	{
-		id: "3",
-		content: "GET and POST are the most important methods of HTTP protocol",
-		important: true,
-	},
-]
-
 const requestLogger = (request, response, next) => {
 	console.log("Method:", request.method)
 	console.log("Path:  ", request.path)
@@ -46,12 +36,9 @@ app.get("/api/notes", (req, res) => {
 
 app.get("/api/notes/:id", (req, res) => {
 	const id = req.params.id
-	const note = notes.find((note) => note.id === id)
-	if (note) {
+	Note.findById(id).then((note) => {
 		res.json(note)
-	} else {
-		res.status(404).send({ error: "Note not found" })
-	}
+	})
 })
 
 app.post("/api/notes", (req, res) => {
@@ -61,21 +48,27 @@ app.post("/api/notes", (req, res) => {
 		return res.status(400).send({ error: "content missing" })
 	}
 
-	const note = {
+	const note = new Note({
 		content: body.content,
 		important: body.important || false,
-		id: crypto.randomUUID(),
-	}
+		date: new Date(),
+	})
 
-	notes = notes.concat(note)
-
-	res.json(note)
+	note.save().then((savedNote) => {
+		res.json(savedNote)
+	})
 })
 
 app.delete("/api/notes/:id", (req, res) => {
 	const id = req.params.id
-	notes = notes.filter((note) => note.id !== id)
-	res.status(204).end()
+	Note.findByIdAndDelete(id)
+		.then((result) => {
+			res.status(204).end()
+		})
+		.catch((error) => {
+			console.log(error.message)
+			res.status(404).send({ error: "note not found" })
+		})
 })
 
 app.use(unknownEndpoint)
