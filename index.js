@@ -1,5 +1,8 @@
 import express from "express"
 import cors from "cors"
+import dotenv from "dotenv"
+dotenv.config()
+import Note from "./models/note.js"
 
 const app = express()
 
@@ -21,7 +24,7 @@ const requestLogger = (request, response, next) => {
 	next()
 }
 
-app.use(express.static('dist'))
+app.use(express.static("dist"))
 
 app.use(express.json())
 app.use(requestLogger)
@@ -36,7 +39,9 @@ app.get("/", (req, res) => {
 })
 
 app.get("/api/notes", (req, res) => {
-	res.json(notes)
+	Note.find({}).then((notes) => {
+		res.json(notes)
+	})
 })
 
 app.get("/api/notes/:id", (req, res) => {
@@ -75,7 +80,7 @@ app.delete("/api/notes/:id", (req, res) => {
 
 app.use(unknownEndpoint)
 
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT
 
 app.listen(PORT, () => {
 	console.log(`server running on port ${PORT}`)
