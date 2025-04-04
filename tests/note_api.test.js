@@ -13,7 +13,7 @@ const initialNotes = [
 ];
 
 beforeEach(async () => {
-  Note.deleteMany({});
+  await Note.deleteMany({});
   let noteObject = new Note(initialNotes[0]);
   await noteObject.save();
   noteObject = new Note(initialNotes[1]);
@@ -36,7 +36,7 @@ test("the first note is about HTTP methods", async () => {
   const res = await api.get("/api/notes");
 
   const contents = res.body.map((e) => e.content);
-  assert(contents.includes("Html is easy"));
+  assert(contents.includes("HTML is easy"));
 });
 
 after(async () => {
